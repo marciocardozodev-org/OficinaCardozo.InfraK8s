@@ -36,7 +36,6 @@ jobs:
         terraform_wrapper: false
 
     - name: Configure AWS credentials
-      if: github.event_name == 'pull_request' || env.DEPLOY_ENABLED == 'true'
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
