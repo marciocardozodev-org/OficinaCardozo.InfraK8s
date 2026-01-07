@@ -1,0 +1,2 @@
+# Terraform local state/cache (não commitar)
+terraform/.terraform/
