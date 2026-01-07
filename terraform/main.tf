@@ -20,3 +20,5 @@ variable "aws_region" {
 }
 
 # TODO: adicionar aqui os recursos de Kubernetes (EKS, namespaces, ingress etc.)
+
+# Marker: alteração mínima para testar fluxo de CI/CD (não afeta recursos)
