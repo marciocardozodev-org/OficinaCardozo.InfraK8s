@@ -1,3 +1,17 @@
+output "private_subnet_ids" {
+  value = [
+    aws_subnet.private_1[0].id,
+    aws_subnet.private_2[0].id
+  ]
+  description = "IDs das subnets privadas para uso no RDS"
+}
+
+output "eks_security_group_ids" {
+  value = [
+    aws_security_group.eks_cluster[0].id
+  ]
+  description = "Security Groups do EKS para uso no RDS"
+}
 terraform {
   required_version = ">= 1.0"
 
@@ -188,7 +202,9 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.eks_cluster[0].arn
 
   vpc_config {
-    subnet_ids         = [aws_subnet.private_1[0].id, aws_subnet.private_2[0].id]
+    # Para simplificar o laboratório inicial, usamos subnets públicas.
+    # Em produção, o ideal é manter o cluster em subnets privadas com NAT.
+    subnet_ids         = [aws_subnet.public_1[0].id, aws_subnet.public_2[0].id]
     security_group_ids = [aws_security_group.eks_cluster[0].id]
   }
 
@@ -240,7 +256,9 @@ resource "aws_eks_node_group" "default" {
   cluster_name    = aws_eks_cluster.this[0].name
   node_group_name = "default"
   node_role_arn   = aws_iam_role.eks_node[0].arn
-  subnet_ids      = [aws_subnet.private_1[0].id, aws_subnet.private_2[0].id]
+  # Para o primeiro cluster, colocamos os nodes em subnets públicas;
+  # isso evita problemas de acesso ao endpoint da API do EKS sem NAT.
+  subnet_ids      = [aws_subnet.public_1[0].id, aws_subnet.public_2[0].id]
 
   scaling_config {
     desired_size = 2
