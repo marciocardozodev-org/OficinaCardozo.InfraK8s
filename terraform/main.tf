@@ -1,3 +1,17 @@
+output "private_subnet_ids" {
+  value = [
+    aws_subnet.private_1[0].id,
+    aws_subnet.private_2[0].id
+  ]
+  description = "IDs das subnets privadas para uso no RDS"
+}
+
+output "eks_security_group_ids" {
+  value = [
+    aws_security_group.eks_cluster[0].id
+  ]
+  description = "Security Groups do EKS para uso no RDS"
+}
 terraform {
   required_version = ">= 1.0"
 
