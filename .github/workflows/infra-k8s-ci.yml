@@ -64,3 +64,15 @@ jobs:
       if: env.DEPLOY_ENABLED == 'true'
       working-directory: ./terraform
       run: terraform apply -input=false -auto-approve tfplan
+
+    - name: Gerar kubeconfig do EKS
+      if: env.DEPLOY_ENABLED == 'true'
+      run: |
+        aws eks update-kubeconfig --region us-east-1 --name oficina-cardozo-eks --kubeconfig kubeconfig.yaml
+
+    - name: Exportar kubeconfig como artefato
+      if: env.DEPLOY_ENABLED == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: kubeconfig
+        path: kubeconfig.yaml
