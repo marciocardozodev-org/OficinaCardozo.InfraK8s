@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: datadog-secret
+  namespace: default
+  labels:
+    app: datadog
+stringData:
+  DD_API_KEY: 9828232f38e1bde8f73bafe1966e3bd9
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datadog-config
+  namespace: default
+  labels:
+    app: datadog
+data:
+  DD_AGENT_HOST: "localhost"
+  DD_ENV: "production"
+  DD_SERVICE: "oficina-cardozo-api"
+  DD_VERSION: "1.0.0"
+  DD_LOGS_INJECTION: "true"
