@@ -1,14 +1,3 @@
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: datadog-secret
-  labels:
-    app: oficina-cardozo-api
-type: Opaque
-data:
-  DATADOG_API_KEY: YjY4NDFiNGE5ODc1Mjk5YzI2NjBmN2E1MDhhMDYyYzU=
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
