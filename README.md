@@ -19,8 +19,8 @@ Repositório com os manifests e configurações de infraestrutura para orquestra
 flowchart LR
     User[Usuário/Cliente]
     APIGW[AWS API Gateway]
-    App[OficinaCardozo.API (EKS)]
-    DB[(Aurora)]
+    App[OficinaCardozo.API EKS]
+    DB[Aurora]
     Datadog[Datadog]
     User --> APIGW
     APIGW --> App
