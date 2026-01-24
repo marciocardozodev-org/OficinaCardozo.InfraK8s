@@ -15,4 +15,16 @@ Repositório com os manifests e configurações de infraestrutura para orquestra
 4. Monitore o cluster via Datadog.
 
 ## Diagrama da Arquitetura
-<!-- Insira aqui o diagrama da arquitetura deste repositório quando disponível -->
+```mermaid
+flowchart LR
+    User[Usuário/Cliente]
+    APIGW[AWS API Gateway]
+    App[OficinaCardozo.API (EKS)]
+    DB[(Aurora)]
+    Datadog[Datadog]
+    User --> APIGW
+    APIGW --> App
+    App --> DB
+    App --> Datadog
+    Datadog -.-> App
+```
