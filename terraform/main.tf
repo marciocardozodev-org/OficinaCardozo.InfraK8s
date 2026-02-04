@@ -267,6 +267,7 @@ resource "aws_eks_node_group" "default" {
   }
 
   instance_types = ["t3.small"]
+    instance_types = ["t3.micro"]
 
   tags = {
     Name = "${var.cluster_name}-node-group-default"
