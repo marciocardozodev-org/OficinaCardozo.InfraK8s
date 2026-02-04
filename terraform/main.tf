@@ -30,7 +30,7 @@ provider "aws" {
 variable "aws_region" {
   description = "AWS region"
   type        = string
-  default     = "us-east-1"
+  default     = "sa-east-1"
 }
 
 variable "enable_eks" {
@@ -267,6 +267,7 @@ resource "aws_eks_node_group" "default" {
   }
 
   instance_types = ["t3.small"]
+    instance_types = ["t3.micro"]
 
   tags = {
     Name = "${var.cluster_name}-node-group-default"
