@@ -61,10 +61,16 @@ jobs:
       run: terraform plan -input=false -out=tfplan
 
 
+
     - name: Terraform Apply
       if: env.DEPLOY_ENABLED == 'true'
       working-directory: ./terraform
       run: terraform apply -input=false -auto-approve tfplan
+
+    - name: Salvar outputs do Terraform (subnets, SGs)
+      if: env.DEPLOY_ENABLED == 'true'
+      working-directory: ./terraform
+      run: terraform output -json > ../terraform-outputs.json
 
     - name: Criar namespaces padrão
       if: env.DEPLOY_ENABLED == 'true'
