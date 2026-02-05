@@ -99,3 +99,9 @@ jobs:
       with:
         name: kubeconfig
         path: kubeconfig.yaml
+    - name: Exportar outputs do Terraform como artefato
+      if: env.DEPLOY_ENABLED == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-outputs
+        path: terraform-outputs.json
