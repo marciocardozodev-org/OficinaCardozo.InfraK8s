@@ -93,15 +93,12 @@ jobs:
         kubectl apply -f ./datadog-config.yaml
         # kubectl apply -f ./datadog-configs.yaml  # Se preferir usar um único arquivo
         # kubectl apply -f ./deployment.yaml       # E demais manifests da API aqui
-    - name: Exportar kubeconfig como artefato
+    - name: Fazer upload do kubeconfig.yaml para S3
       if: env.DEPLOY_ENABLED == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: kubeconfig
-        path: kubeconfig.yaml
-    - name: Exportar outputs do Terraform como artefato
+      run: |
+        aws s3 cp kubeconfig.yaml s3://oficina-cardozo-shared-artifacts/kubeconfig/kubeconfig.yaml
+
+    - name: Fazer upload do terraform-outputs.json para S3
       if: env.DEPLOY_ENABLED == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: terraform-outputs
-        path: terraform-outputs.json
+      run: |
+        aws s3 cp terraform-outputs.json s3://oficina-cardozo-shared-artifacts/terraform/terraform-outputs.json
