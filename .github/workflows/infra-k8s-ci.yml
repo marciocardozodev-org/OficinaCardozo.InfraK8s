@@ -84,15 +84,6 @@ jobs:
         aws eks update-kubeconfig --region sa-east-1 --name oficina-cardozo-eks --kubeconfig kubeconfig.yaml
 
 
-    - name: Aplicar Datadog Secret/ConfigMap e deployment da API
-      if: env.DEPLOY_ENABLED == 'true'
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
-      run: |
-        kubectl apply -f ./datadog-secret.yaml
-        kubectl apply -f ./datadog-config.yaml
-        # kubectl apply -f ./datadog-configs.yaml  # Se preferir usar um único arquivo
-        # kubectl apply -f ./deployment.yaml       # E demais manifests da API aqui
     - name: Fazer upload do kubeconfig.yaml para S3
       if: env.DEPLOY_ENABLED == 'true'
       run: |

@@ -6,13 +6,11 @@ Repositório com os manifests e configurações de infraestrutura para orquestra
 ## Tecnologias Utilizadas
 - Kubernetes (EKS)
 - AWS
-- Datadog
 
 ## Passos para Execução e Deploy
 1. Clone o repositório.
 2. Configure o acesso ao cluster EKS.
 3. Aplique os manifests com `kubectl apply -f <manifesto>.yaml`.
-4. Monitore o cluster via Datadog.
 
 ## Diagrama da Arquitetura
 ```mermaid
@@ -21,10 +19,7 @@ flowchart LR
     APIGW[AWS API Gateway]
     App[OficinaCardozo.API EKS]
     DB[Aurora]
-    Datadog[Datadog]
     User --> APIGW
     APIGW --> App
     App --> DB
-    App --> Datadog
-    Datadog -.-> App
 ```
