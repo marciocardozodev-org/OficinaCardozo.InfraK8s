@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-db-job
+  namespace: oficina-prod
+spec:
+  template:
+    spec:
+      containers:
+      - name: psql
+        image: postgres:15
+        command: ["sh", "-c"]
+        args:
+          - |
+            psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f /sql/create-db.sql
+        env:
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: oficina-cardozo-db-secret
+              key: DB_HOST
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: oficina-cardozo-db-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: oficina-cardozo-db-secret
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: oficina-cardozo-db-secret
+              key: DB_NAME
+        volumeMounts:
+        - name: sql-script
+          mountPath: /sql
+      restartPolicy: Never
+      volumes:
+      - name: sql-script
+        configMap:
+          name: create-db-sql
+  backoffLimit: 1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: create-db-sql
+  namespace: oficina-prod
+data:
+  create-db.sql: |
+    CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+        "MigrationId" character varying(150) NOT NULL,
+        "ProductVersion" character varying(32) NOT NULL,
+        CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+    );
+
+    START TRANSACTION;
+
+    DO $EF$
+    BEGIN
+        IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20251011145222_InitialCreate') THEN
+        CREATE TABLE "OFICINA_CLIENTE" (
+            "ID" INTEGER NOT NULL,
+            "NOME" TEXT NOT NULL,
+            "CPF_CNPJ" TEXT NOT NULL,
+            "TELEFONE_PRINCIPAL" TEXT NOT NULL,
+            "EMAIL_PRINCIPAL" TEXT NOT NULL,
+            "ENDERECO_PRINCIPAL" TEXT NOT NULL,
+            CONSTRAINT "PK_OFICINA_CLIENTE" PRIMARY KEY ("ID")
+        );
+        END IF;
+    END $EF$;
+    ... (conteúdo completo igual ao homolog) ...
