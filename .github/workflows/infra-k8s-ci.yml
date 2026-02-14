@@ -75,19 +75,16 @@ jobs:
     - name: Criar namespaces padrão
       if: env.DEPLOY_ENABLED == 'true'
       run: |
-        aws eks update-kubeconfig --region sa-east-1 --name oficina-cardozo-eks
+        aws eks update-kubeconfig --region sa-east-1 --name oficina-cardozo-eks --kubeconfig kubeconfig.yaml
+        export KUBECONFIG=${{ github.workspace }}/kubeconfig.yaml
         kubectl apply -f ./terraform/namespaces.yaml
 
-      if: env.DEPLOY_ENABLED == 'true'
-      run: |
-        aws eks update-kubeconfig --region sa-east-1 --name oficina-cardozo-eks --kubeconfig kubeconfig.yaml
-
-    - name: Aplicar Secret do certificado global-bundle.pe
+    - name: Aplicar ConfigMap do certificado global-bundle.pe
       if: env.DEPLOY_ENABLED == 'true'
       env:
         KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
       run: |
-        kubectl apply -f ./cert-global-bundle-pe.yaml
+        kubectl apply -f ./cert-global-bundle-pe-configmap.yaml
 
 
     - name: Fazer upload do kubeconfig.yaml para S3
