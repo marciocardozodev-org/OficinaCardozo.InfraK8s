@@ -13,6 +13,10 @@ spec:
         args:
         - |
             export PGPASSWORD="$DB_PASSWORD"
+            if psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c '\dt' | grep -q OFICINA_CLIENTE; then
+                echo 'Banco já existe, pulando criação.'
+                exit 0
+            fi
             psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f /sql/create-db.sql
         env:
         - name: DB_HOST
