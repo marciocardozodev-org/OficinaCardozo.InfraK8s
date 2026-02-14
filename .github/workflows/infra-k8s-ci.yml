@@ -107,31 +107,19 @@ jobs:
       env:
         KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
       run: |
-        kubectl wait --for=condition=complete --timeout=300s job/create-db-job -n oficina-homolog
-        kubectl logs job/create-db-job -n oficina-homolog
+        set -e
+        kubectl wait --for=condition=complete --timeout=300s job/create-db-job -n oficina-homolog || {
+          echo 'Job não completou, coletando debug:'
+          kubectl describe job/create-db-job -n oficina-homolog || true
+          kubectl get pods -n oficina-homolog -l job-name=create-db-job || true
+          POD=$(kubectl get pods -n oficina-homolog -l job-name=create-db-job -o jsonpath='{.items[0].metadata.name}')
+          kubectl logs "$POD" -n oficina-homolog || true
+          exit 1
+        }
+        POD=$(kubectl get pods -n oficina-homolog -l job-name=create-db-job -o jsonpath='{.items[0].metadata.name}')
+        kubectl logs "$POD" -n oficina-homolog
 
 
-    - name: Validar Job de criação do banco (prod)
-      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
-      run: |
-        kubectl apply --dry-run=client -f ./create-db-job-prod.yaml
-
-    - name: Aplicar Job de criação do banco (prod)
-      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
-      run: |
-        kubectl apply -f ./create-db-job-prod.yaml
-
-    - name: Aguardar conclusão do Job de criação do banco (prod)
-      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
-      run: |
-        kubectl wait --for=condition=complete --timeout=300s job/create-db-job -n oficina-prod
-        kubectl logs job/create-db-job -n oficina-prod
 
 
     - name: Fazer upload do kubeconfig.yaml para S3
