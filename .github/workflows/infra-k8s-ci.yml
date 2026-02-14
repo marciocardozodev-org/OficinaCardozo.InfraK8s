@@ -1,24 +1,3 @@
-    - name: Validar Job de criação do banco (prod)
-      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
-      run: |
-        kubectl apply --dry-run=client -f ./create-db-job-prod.yaml
-
-    - name: Aplicar Job de criação do banco (prod)
-      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
-      run: |
-        kubectl apply -f ./create-db-job-prod.yaml
-
-    - name: Aguardar conclusão do Job de criação do banco (prod)
-      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
-      run: |
-        kubectl wait --for=condition=complete --timeout=300s job/create-db-job -n oficina-prod
-        kubectl logs job/create-db-job -n oficina-prod
 name: CI/CD - Infra Kubernetes
 
 on:
@@ -88,12 +67,6 @@ jobs:
       if: env.DEPLOY_ENABLED == 'true'
       run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-    - name: Executar script de criação do banco de dados
-      if: env.DEPLOY_ENABLED == 'true'
-      env:
-        PGPASSWORD: ${{ secrets.DB_PASSWORD }}
-      run: |
-        psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f ./create-db.sql
 
     - name: Salvar outputs do Terraform (subnets, SGs)
       if: env.DEPLOY_ENABLED == 'true'
@@ -134,8 +107,19 @@ jobs:
       env:
         KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
       run: |
-        kubectl wait --for=condition=complete --timeout=300s job/create-db-job -n oficina-homolog
-        kubectl logs job/create-db-job -n oficina-homolog
+        set -e
+        kubectl wait --for=condition=complete --timeout=300s job/create-db-job -n oficina-homolog || {
+          echo 'Job não completou, coletando debug:'
+          kubectl describe job/create-db-job -n oficina-homolog || true
+          kubectl get pods -n oficina-homolog -l job-name=create-db-job || true
+          POD=$(kubectl get pods -n oficina-homolog -l job-name=create-db-job -o jsonpath='{.items[0].metadata.name}')
+          kubectl logs "$POD" -n oficina-homolog || true
+          exit 1
+        }
+        POD=$(kubectl get pods -n oficina-homolog -l job-name=create-db-job -o jsonpath='{.items[0].metadata.name}')
+        kubectl logs "$POD" -n oficina-homolog
+
+
 
 
     - name: Fazer upload do kubeconfig.yaml para S3
