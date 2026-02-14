@@ -1,3 +1,24 @@
+    - name: Validar Job de criação do banco (prod)
+      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
+      run: |
+        kubectl apply --dry-run=client -f ./create-db-job-prod.yaml
+
+    - name: Aplicar Job de criação do banco (prod)
+      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
+      run: |
+        kubectl apply -f ./create-db-job-prod.yaml
+
+    - name: Aguardar conclusão do Job de criação do banco (prod)
+      if: env.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/master'
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
+      run: |
+        kubectl wait --for=condition=complete --timeout=300s job/create-db-job -n oficina-prod
+        kubectl logs job/create-db-job -n oficina-prod
 name: CI/CD - Infra Kubernetes
 
 on:
@@ -62,10 +83,17 @@ jobs:
 
 
 
-    - name: Terraform Apply
+
+    - name: Instalar psql client
       if: env.DEPLOY_ENABLED == 'true'
-      working-directory: ./terraform
-      run: terraform apply -input=false -auto-approve tfplan
+      run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+    - name: Executar script de criação do banco de dados
+      if: env.DEPLOY_ENABLED == 'true'
+      env:
+        PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+      run: |
+        psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f ./create-db.sql
 
     - name: Salvar outputs do Terraform (subnets, SGs)
       if: env.DEPLOY_ENABLED == 'true'
@@ -79,12 +107,35 @@ jobs:
         export KUBECONFIG=${{ github.workspace }}/kubeconfig.yaml
         kubectl apply -f ./terraform/namespaces.yaml
 
+
     - name: Aplicar ConfigMap do certificado global-bundle.pe
       if: env.DEPLOY_ENABLED == 'true'
       env:
         KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
       run: |
         kubectl apply -f ./cert-global-bundle-pe-configmap.yaml
+
+    - name: Validar Job de criação do banco
+      if: env.DEPLOY_ENABLED == 'true'
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
+      run: |
+        kubectl apply --dry-run=client -f ./create-db-job.yaml
+
+    - name: Aplicar Job de criação do banco
+      if: env.DEPLOY_ENABLED == 'true'
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
+      run: |
+        kubectl apply -f ./create-db-job.yaml
+
+    - name: Aguardar conclusão do Job de criação do banco
+      if: env.DEPLOY_ENABLED == 'true'
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
+      run: |
+        kubectl wait --for=condition=complete --timeout=300s job/create-db-job -n oficina-homolog
+        kubectl logs job/create-db-job -n oficina-homolog
 
 
     - name: Fazer upload do kubeconfig.yaml para S3
