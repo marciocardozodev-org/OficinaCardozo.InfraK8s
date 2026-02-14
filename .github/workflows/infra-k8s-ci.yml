@@ -76,6 +76,7 @@ jobs:
       if: env.DEPLOY_ENABLED == 'true'
       run: |
         aws eks update-kubeconfig --region sa-east-1 --name oficina-cardozo-eks --kubeconfig kubeconfig.yaml
+        export KUBECONFIG=${{ github.workspace }}/kubeconfig.yaml
         kubectl apply -f ./terraform/namespaces.yaml
 
     - name: Aplicar Secret do certificado global-bundle.pe
