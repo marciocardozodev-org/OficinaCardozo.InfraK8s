@@ -67,12 +67,6 @@ jobs:
       if: env.DEPLOY_ENABLED == 'true'
       run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-    - name: Executar script de criação do banco de dados
-      if: env.DEPLOY_ENABLED == 'true'
-      env:
-        PGPASSWORD: ${{ secrets.DB_PASSWORD }}
-      run: |
-        psql -h ${{ secrets.DB_HOST }} -U ${{ secrets.DB_USER }} -d ${{ secrets.DB_NAME }} -f ./create-db.sql
 
     - name: Salvar outputs do Terraform (subnets, SGs)
       if: env.DEPLOY_ENABLED == 'true'
