@@ -79,12 +79,12 @@ jobs:
         export KUBECONFIG=${{ github.workspace }}/kubeconfig.yaml
         kubectl apply -f ./terraform/namespaces.yaml
 
-    - name: Aplicar Secret do certificado global-bundle.pe
+    - name: Aplicar ConfigMap do certificado global-bundle.pe
       if: env.DEPLOY_ENABLED == 'true'
       env:
         KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
       run: |
-        kubectl apply -f ./cert-global-bundle-pe.yaml
+        kubectl apply -f ./cert-global-bundle-pe-configmap.yaml
 
 
     - name: Fazer upload do kubeconfig.yaml para S3
